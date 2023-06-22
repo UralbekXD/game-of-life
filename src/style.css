@@ -79,3 +79,7 @@ body {
 #next:hover {
     background-color: var(--blue);
 }
+
+#world {
+    user-select: none;
+}

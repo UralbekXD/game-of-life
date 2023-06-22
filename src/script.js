@@ -18,17 +18,17 @@ let config = {
 };
 
 let interval;
+let isMouseDown = false;
 
 let arr = [];
 
 
 class Rect {
-
-    constructor(y, x, color="black") {
-        this.x = x * config.cellSize,
-        this.y = y * config.cellSize,
-        this.width = config.cellSize - 1,
-        this.height = config.cellSize - 1,
+    constructor(y, x, color= "black") {
+        this.x = x * config.cellSize;
+        this.y = y * config.cellSize;
+        this.width = config.cellSize - 1;
+        this.height = config.cellSize - 1;
         this.color = color;
     }
 
@@ -36,18 +36,18 @@ class Rect {
 
         context.beginPath();
         context.lineWidth = 1;
-        context.strokeStyle = (this.color == "black") ? "grey" : "white";
+        context.strokeStyle = (this.color === "black") ? "grey" : "white";
         context.fillStyle = this.color;
 
         context.rect(
             this.x,
             this.y,
             this.width,
-            this.height
+            this.height,
         );
 
         context.stroke();
-        context.fill()
+        context.fill();
     }
 
     clear(context) {
@@ -57,7 +57,7 @@ class Rect {
             this.x,
             this.y,
             this.width,
-            this.height
+            this.height,
         )
 
     }
@@ -82,7 +82,7 @@ function draw(array) {
             let white = new Rect(i, j, "white");
             let black = new Rect(i, j);
 
-            if (array[i][j] == 1) {
+            if (array[i][j] === 1) {
                 white.clear(ctx);
                 white.draw(ctx);
             } else {
@@ -152,7 +152,7 @@ function next() {
                 let x = cord[0], y = cord[1];
 
                 if ( (x >= 0 && x < arr.length) && (y >= 0 && y < arr[i].length) ) {
-                    if (arr[x][y] == 1) {
+                    if (arr[x][y] === 1) {
                         return true;
                     }
                 }
@@ -160,10 +160,10 @@ function next() {
             
             let cell = arr[i][j];
 
-            if (cell == 1 && valid < 2 || valid > 3) {
+            if (cell === 1 && valid < 2 || valid > 3) {
                 temp[i][j] = 0;
             }
-            else if (cell == 0 && valid == 3) {
+            else if (cell === 0 && valid === 3) {
                 temp[i][j] = 1;
             } else {
                 temp[i][j] = cell;
@@ -187,62 +187,44 @@ function update() {
 
 
 function loop() {
-
     interval = setInterval(function() {
         update();
     }, config.time);
 }
 
+function controller(event) {
+    if (isMouseDown && event.type === "mousemove") {
+        let x = event.offsetX;
+        let y = event.offsetY;
+
+        x = Math.floor(x / config.cellSize);
+        y = Math.floor(y / config.cellSize);
+
+        if (!arr[y][x]) {
+            let cell = new Rect(y, x, "white");
+
+            arr[y][x] = 1;
+
+            cell.clear(ctx);
+            cell.draw(ctx);
+        }
+    }
+}
 
 function main() {
     drawWorld();
     init();
     draw(arr);
-
 }
 
-main();
-
+document.body.onmousedown = () => {isMouseDown = true};
+document.body.onmouseup = () => {isMouseDown = false};
 
 resetBtn.addEventListener("click", reset);
-
-
 startBtn.addEventListener("click", loop);
-
-
 nextBtn.addEventListener("click", update);
 
+canvas.addEventListener("mousemove", controller);
+canvas.addEventListener("mousedown", controller);
 
-canvas.addEventListener("click", function(event) {
-    let x = event.offsetX;
-    let y = event.offsetY;
-
-
-    x = Math.floor(x / config.cellSize);
-    y = Math.floor(y / config.cellSize);
-
-    console.log(config.canvasWidth, config.canvasHeight);;
-
-
-    switch (arr[y][x]) {
-        case 0:
-            let false_ = new Rect(y, x, "white");
-
-            arr[y][x] = 1;
-
-            false_.clear(ctx);
-            false_.draw(ctx);
-            break;
-
-        case 1:
-            let true_ = new Rect(y, x);
-
-            arr[y][x] = 0;
-
-    
-            true_.clear(ctx);
-            true_.draw(ctx);
-            break;
-    }
-
-});
+main();
